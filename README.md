@@ -6,7 +6,7 @@ A modern full-stack web application built using **React (TypeScript)** and **Sup
 
 ## 🌐 Live Demo
 
-👉 https://your-app-name.netlify.app
+👉 https://supabase-app1.netlify.app
 
 ---
 
