@@ -97,69 +97,49 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex items-center justify-center p-4">
-      {!user ? (
-        <div className="bg-gray-800 p-8 rounded-2xl shadow-xl text-center">
-          <h1 className="text-3xl font-bold mb-4">🚀 Supabase App</h1>
-          <p className="mb-6 text-gray-300">Login to manage your tasks</p>
+  <div className="container">
+    {!user ? (
+      <div className="card">
+        <h1>Supabase</h1>
+        <p>Secure Login + RLS + Edge Functions</p>
 
-          <button
-            onClick={handleLogin}
-            className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-lg font-semibold transition"
-          >
-            Login with Google
+        <button className="btn" onClick={handleLogin}>
+          Login with Google
+        </button>
+      </div>
+    ) : (
+      <div className="dashboard">
+        <div className="header">
+          <h2>Welcome 👋</h2>
+          <p>{user.email}</p>
+          <button className="logout" onClick={handleLogout}>
+            Logout
           </button>
         </div>
-      ) : (
-        <div className="w-full max-w-xl bg-gray-800 p-6 rounded-2xl shadow-xl">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-xl font-bold">Welcome 👋</h2>
-              <p className="text-sm text-gray-400">{user.email}</p>
-            </div>
 
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 px-4 py-1 rounded hover:bg-red-600"
-            >
-              Logout
-            </button>
-          </div>
-
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              placeholder="Enter new task..."
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-              className="flex-1 px-3 py-2 rounded bg-gray-700 outline-none"
-            />
-            <button
-              onClick={addTask}
-              className="bg-green-500 px-4 rounded hover:bg-green-600"
-            >
-              Add
-            </button>
-          </div>
-
-          <ul className="space-y-2">
-            {tasks.length === 0 ? (
-              <p className="text-gray-400">No tasks yet</p>
-            ) : (
-              tasks.map((task) => (
-                <li
-                  key={task.id}
-                  className="bg-gray-700 px-3 py-2 rounded"
-                >
-                  {task.title}
-                </li>
-              ))
-            )}
-          </ul>
+        <div className="task-box">
+          <input
+            type="text"
+            placeholder="Enter new task..."
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+          />
+          <button onClick={addTask}>Add</button>
         </div>
-      )}
-    </div>
-  )
+
+        <ul className="task-list">
+          {tasks.length === 0 ? (
+            <p>No tasks yet</p>
+          ) : (
+            tasks.map((task) => (
+              <li key={task.id}>{task.title}</li>
+            ))
+          )}
+        </ul>
+      </div>
+    )}
+  </div>
+ )
 }
 
 export default App
