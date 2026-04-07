@@ -8,6 +8,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [newTask, setNewTask] = useState('')
 
+  // 🔹 Get user on load + listen for auth changes
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser()
@@ -28,6 +29,14 @@ function App() {
     }
   }, [])
 
+  // 🔹 Fetch tasks when user logs in
+  useEffect(() => {
+    if (user) {
+      fetchTasks()
+    }
+  }, [user])
+
+  // 🔹 Google Login
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -35,78 +44,117 @@ function App() {
         redirectTo: window.location.origin
       }
     })
-}
+  }
 
+  // 🔹 Logout
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setUser(null)
     setTasks([])
   }
 
+  // 🔹 Fetch tasks from Edge Function
   const fetchTasks = async () => {
-   const { data, error } = await supabase.functions.invoke('getTasks')
+    const { data, error } = await supabase.functions.invoke('getTasks')
 
-   if (error) {
-    console.error(error)
-  } else {
-    setTasks(data)
+    console.log('TASKS:', data)
+
+    if (error) {
+      console.error(error)
+    } else {
+      setTasks(data || [])
+    }
   }
-}
 
+  // 🔹 Add Task (RLS-safe)
   const addTask = async () => {
     if (!newTask.trim()) return
 
-    await supabase.from('tasks').insert([{ title: newTask }])
-    setNewTask('')
-    fetchTasks()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { error } = await supabase.from('tasks').insert([
+      {
+        title: newTask,
+        user_id: user?.id
+      }
+    ])
+
+    if (error) {
+      console.error(error)
+    } else {
+      setNewTask('')
+      fetchTasks()
+    }
   }
 
-  useEffect(() => {
-    if (user) fetchTasks()
-  }, [user])
-
+  // 🔹 Loading screen
   if (loading) {
     return (
-      <div className="center">
-        <h2>Loading...</h2>
+      <div className="flex items-center justify-center h-screen text-xl">
+        Loading...
       </div>
     )
   }
 
   return (
-    <div className="container">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex items-center justify-center p-4">
       {!user ? (
-        <div className="card">
-          <h1>Login App</h1>
+        <div className="bg-gray-800 p-8 rounded-2xl shadow-xl text-center">
+          <h1 className="text-3xl font-bold mb-4">🚀 Supabase App</h1>
+          <p className="mb-6 text-gray-300">Login to manage your tasks</p>
 
-          <button className="btn" onClick={handleLogin}>
+          <button
+            onClick={handleLogin}
+            className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-lg font-semibold transition"
+          >
             Login with Google
           </button>
         </div>
       ) : (
-        <div className="dashboard">
-          <div className="header">
-            <h2>Welcome</h2>
-            <p>{user.email}</p>
-            <button className="logout" onClick={handleLogout}>
+        <div className="w-full max-w-xl bg-gray-800 p-6 rounded-2xl shadow-xl">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-xl font-bold">Welcome 👋</h2>
+              <p className="text-sm text-gray-400">{user.email}</p>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 px-4 py-1 rounded hover:bg-red-600"
+            >
               Logout
             </button>
           </div>
 
-          <div className="task-box">
+          <div className="flex gap-2 mb-4">
             <input
               type="text"
               placeholder="Enter new task..."
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
+              className="flex-1 px-3 py-2 rounded bg-gray-700 outline-none"
             />
-            <button onClick={addTask}>Add</button>
+            <button
+              onClick={addTask}
+              className="bg-green-500 px-4 rounded hover:bg-green-600"
+            >
+              Add
+            </button>
           </div>
 
-          <ul className="task-list">
-            {tasks.map((task) => (
-              <li key={task.id}>{task.title}</li>
-            ))}
+          <ul className="space-y-2">
+            {tasks.length === 0 ? (
+              <p className="text-gray-400">No tasks yet</p>
+            ) : (
+              tasks.map((task) => (
+                <li
+                  key={task.id}
+                  className="bg-gray-700 px-3 py-2 rounded"
+                >
+                  {task.title}
+                </li>
+              ))
+            )}
           </ul>
         </div>
       )}
