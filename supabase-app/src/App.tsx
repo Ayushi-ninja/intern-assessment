@@ -100,8 +100,8 @@ function App() {
   <div className="container">
     {!user ? (
       <div className="card">
-        <h1>Supabase</h1>
-        <p>Secure Login + RLS + Edge Functions</p>
+        <h1>Task App</h1>
+        <p>Google Login</p>
 
         <button className="btn" onClick={handleLogin}>
           Login with Google
