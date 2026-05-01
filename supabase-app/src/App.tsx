@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { supabase } from './supabaseClient'
 import type { Task } from './types'
 
 function App() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [newTask, setNewTask] = useState('')
